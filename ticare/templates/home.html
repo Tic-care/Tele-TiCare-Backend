@@ -1,8 +1,15 @@
 {% extends 'base.html' %}
 {% block title %}
-    Home Page
+    Welcome 
 {% endblock %}
-
 {% block content %}
-    This is our content for the Home Page
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-5 text-center bg-dark" style="color:white">
+        <div class="col-md-10 p-lg-10 mx-auto my-5">
+            <h1 class="display-3 font-weight-normal">Welcome to Ticare</h1>
+            <p class="lead font-weight-normal">Start Tic assesment</p>
+            <a class="btn btn-primary" href="{{ url_for('session_page') }}">Get Started</a>
+        </div>
+        <div class="product-device box-shadow d-none d-md-block"></div>
+        <div class="product-device product-device-2 box-shadow d-none d-md-block"></div>
+    </div>
 {% endblock %}

@@ -3,7 +3,8 @@ from ticare import app, ALLOWED_EXTENSIONS , db
 from ticare.models import User ,Session
 from ticare.forms import RegisterForm, LoginForm
 from ticare.functions import preprocesss
-from flask_login import login_user
+from flask_login import login_user, logout_user, login_required , login_required
+
 
 import os
 
@@ -16,6 +17,7 @@ def home_page():
     return render_template('home.html')
 
 @app.route('/sessions')
+@login_required
 def session_page():
     Sessions = Session.query.all()
     print(Sessions)
@@ -30,6 +32,8 @@ def register_page():
                               password=form.password1.data)
         db.session.add(user_to_create)
         db.session.commit()
+        login_user(user_to_create)
+        flash(f"Account created successfully! You are now logged in as {user_to_create.username}", category='success')
         return redirect(url_for('home_page'))
     if form.errors != {}: #If there are not errors from the validations
         for err_msg in form.errors.values():
@@ -73,3 +77,9 @@ def upload_file():
         return jsonify({'message': 'Video uploaded successfully'})
 
     return jsonify({'error': 'Invalid file format'})
+
+@app.route('/logout')
+def logout_page():
+    logout_user()
+    flash("You have been logged out!", category='info')
+    return redirect(url_for("home_page"))
