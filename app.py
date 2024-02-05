@@ -8,6 +8,17 @@ CORS(app)
 
 UPLOAD_FOLDER = 'savedVideo'
 ALLOWED_EXTENSIONS = {'webm'}
+ALLOWED_HOSTS = ['*']
+
+# CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ALLOW_CREDENTIALS = True
+
+# CORS_ORIGIN_WHITELIST = [
+# 'https://ec2-ip/login',
+# 'http://127.0.0.1:3000',
+# # 'your frontend local host url'
+# ]
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 count = 1  # Initialize count
