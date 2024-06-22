@@ -11,13 +11,13 @@ config = {
 }
 
 
-
-
-
 firebase = pyrebase.initialize_app(config)
-# db = firebase.database()
+db = firebase.database()
 
 storage = firebase.storage()
+
+
+
 # videos_storage = storage.child("videos")
 # storage.child("trail/2.mp4").download("download","downloaded.mp4")
 # url = storage.child(
@@ -25,53 +25,51 @@ storage = firebase.storage()
 # print(url)
 
 # storage.child("trail").put("t.jpg")
-# users = db.child("users").get()
-# print(users.key())
+
 
 
 # We store the file in local_img_dir, which is .jpg
 
-# fireb_upload = storage.child("photos/img.jpg").put("t.jpg")
+# fireb_upload = storage.child("trail/img.jpg").put("t.jpg")
 
-storage.child("trail/2.mp4").download(filename="download/it.mp4",
-                                         path="download/")
+# storage.child("trail/2.mp4").delete("trail/2.mp4", None)
 
 
+# storage.child(
+#     "trail/img.jpg").download(path="download", filename="img1.jpg")
+# print(storage.list_files())
 # filename = "it.jpg"
 # path="img/"
 # download_path = os.path.join(path, filename)
-
-# if os.path.exists(download_path):
-#     print(f"File already exists: {download_path}")
-#     # Optionally, generate a unique filename here
-# else:
-#     fireb_upload = storage.child("img.jpg").download(
-#         filename=filename, path=path)
-#     print("Download successful!")
 
 
 
 # print(fireb_upload)
 # print("Test image saved to FireBase Storage.")
 
-# for user in users.each():
-#     print("***********************************")
-#     print(user.key())  # Morty
-#     videos = user.val()["videos"]
-#     print(type(videos))
-#     if videos:
-#         for video_name, video_data in videos.items():
-#             print("/////////////////////////////////////////")
-#             # print(video_data)
-#             # video = videos_storage.child(f"{user.key()}").child(
-#             #     f"recorded_{video_data['id']}.webm")
-#             storage.child(
-#                 f"videos/{user.key()}/recorded_{video_data['id']}.webm").download("download", f"{video_data['id']}.webm")
-#             # print(video)
-#             # video.download("download",f"{video_data['id']}.webm")
-#             # urllib.request.urlretrieve(video_data['url'], f'video_{video_name}.webm')
+
+users = db.child("users").get()
+print(users.key())
+local_download_path="downloaded_videos"
+for user in users.each():
+    print("***********************************")
+    print(user.key())  # Morty
+    videos = user.val()["videos"]
+    print(type(videos))
+    if videos:
+        for video_name, video_data in videos.items():
+            print("/////////////////////////////////////////")
+            # print(video_data)
+            # video = videos_storage.child(f"{user.key()}").child(
+            #     f"recorded_{video_data['id']}.webm")
+            firebase_storage_path = f"videos/{user.key()}/recorded_{video_data['id']}.webm"
+            
+            storage.child().download(path=firebase_storage_path,filename= f"{local_download_path}/{video_data['id']}.webm")
+            # print(video)
+            # video.download("download",f"{video_data['id']}.webm")
+            # urllib.request.urlretrieve(video_data['url'], f'video_{video_name}.webm')
     
-#     # print(videos)  # {name": "Mortimer 'Morty' Smith"}
+    # print(videos)  # {name": "Mortimer 'Morty' Smith"}
 
 
 
