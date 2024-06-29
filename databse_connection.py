@@ -83,10 +83,11 @@ class database_connection():
         print(f"Data: {message['data']}")
         print(f"Path: {message['path']}")
         print(message)
-        if (message['event'] == 'patch'):
+        if (message['event'] == 'put'):
+            ########################################I need the output to check it's from users
             print(f"{message['path'].split('/')[1]}")
             user_id = message['path'].split('/')[1]
-            video_id = list(message['data'].keys())[0]
+            video_id = message['data']['id']
             self.download_video(user_id, video_id)
             ####call the functions########
 
