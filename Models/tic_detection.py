@@ -3,7 +3,7 @@ from emotion_recognation import EmotionRecognation
 # import temporal_detection as temp_detect
 import TemporalMethod as temp_detect
 from spatialAnalysisv2 import SpatialAnalysis
-
+from TemporalMethod import TemporalDetection, ModifiedSlowFast, PackPathway
 
 def video_process(filePath):
     input_video = SpatialAnalysis(filePath)
@@ -62,27 +62,37 @@ class TicDetection():
     def detect_tic(self):
         # detect_tics = temp_detect.TemporalDetection(
         #     "downloaded_videos/subject1_video9.mp4", "upload_videos")
-        detect_tics = temp_detect.TemporalDetection(
+        detect_tics = TemporalDetection(
             self.file_path, self.upload_path)
         temporals = detect_tics.Temporal_Detection()
-
+        print("Temporal Done!!!!")
         # {'clips_in_ranges': clips_in_ranges, "output_path": self.output_dir,
         #     'tics_count': tics_count, 'clips': clips, 'predictions': preds}
         body_parts=[]
         avg_emotion = []
-
+        print(temporals)
         results = video_process(self.file_path)
-        for interval in temporals['clips_in_ranges']:   
+        print("results calculated")
+        for i, interval in enumerate(temporals['clips_in_ranges']):   
+            print(interval)
             body_parts.append(detect_areas(
                 results, TicsSec=interval,  ticThreshold=1))
-        for video in temporals['output_path']:
-            emotion = EmotionRecognation(video)
+            print("one clip body part!!!!")
+            emotion = EmotionRecognation(temporals['output_path'][i])
             avg_emotion.append(emotion.get_emotion_in_video())
+            print("one clip emotions!!!!")
+
+        print("Spatial & Emotions Done!!!!")
+        # for video in temporals['output_path']:
+        #     emotion = EmotionRecognation(video)
+        #     avg_emotion.append(emotion.get_emotion_in_video())
 
         temporals['body_parts'] = body_parts
         temporals['emotions'] = avg_emotion
-
+        print(temporals)
         
-
+print("***")
+tics = TicDetection("downloaded_videos/subject1_video1.mp4", "upload_videos")
+tics.detect_tic()
 
 # temporals = temp_detect.TemporalDetection("downloaded_videos/subject1_video9.mp4", "upload_videos")

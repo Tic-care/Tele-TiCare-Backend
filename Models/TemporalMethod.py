@@ -1,5 +1,6 @@
 # Run pip install fvcore to install this library
 #Then run pip install av after the first library installation
+import cv2
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -105,8 +106,9 @@ class TemporalDetection:
   def extract_features(self, ):
     num_of_clips= int(self.video.duration) // int(1.0666666666666667)
     print("Video clips: ", num_of_clips)
-    all_features = np.zeros((num_of_clips, 2304))
-    for clip_index, start_sec in enumerate(range(0, int(self.video.duration), int(clip_duration))):
+    print(self.video.duration)
+    all_features = np.zeros((20, 2304))
+    for clip_index, start_sec in enumerate(range(0, 20, int(clip_duration))):
           end_sec = min(start_sec + clip_duration, self.video.duration)
 
           # Load the desired clip (replace with your actual clip loading logic)
@@ -156,25 +158,30 @@ class TemporalDetection:
     clips = [[sub_clip[0], sub_clip[-1]] for sub_clip in clips if sub_clip]
     return clips, tics_count, clips_by_one
   def save_video(self, video_tensor, output_path, fps=30):
+      print(video_tensor)
       video_tensor = video_tensor.permute(1, 2, 3, 0)
       io.write_video(output_path, video_tensor, fps)
   def Temporal_Detection(self, ):
+
       preds = self.make_predictions()
       preds = np.array(preds).reshape(-1)
       clips_in_ranges, tics_count, clips = self.concatenated_clips(preds)
     #   print(clips)
     #   print(preds)
+      output_files=[]
       for i, (start, end) in enumerate(clips_in_ranges):
           video_tensor = self.video.get_clip(start, end)
+          print("******************start,end", start, end)
           output_file = os.path.join(self.output_dir, f'clip_{i+1}.mp4')
           self.save_video(video_tensor['video'], output_file)
-      return {'clips_in_ranges': clips_in_ranges, "output_path": self.output_dir, 'tics_count': tics_count, 'clips': clips, 'predictions':preds}
+          output_files.append(output_file)
+      return {'clips_in_ranges': clips_in_ranges, "output_path": output_files, 'tics_count': tics_count, 'clips': clips, 'predictions': preds}
 
 #To use this file in another project just import the file in the project and then make an object of the class TemporalDetection 
 #and call the Temporal_Detection method
 
 
-detect_tics = TemporalDetection(
-    "downloaded_videos/subject1_video9.mp4", "upload_videos")
-temporals = detect_tics.Temporal_Detection()
-print(temporals)
+# detect_tics = TemporalDetection(
+#     "downloaded_videos/subject1_video9.mp4", "upload_videos")
+# temporals = detect_tics.Temporal_Detection()
+# print(temporals)
