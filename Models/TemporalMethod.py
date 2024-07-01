@@ -7,6 +7,7 @@ import pandas as pd
 from typing import Dict
 import json
 import urllib
+from scipy import stats
 # import torchvision
 # import torchvision.transforms as transforms
 import torch
@@ -98,17 +99,18 @@ class TemporalDetection:
   def __init__(self, video_path, output_dir):
     #Change this model path
     self.model_feature_extraction_slowfast = torch.load('Models/slowfast_1sec_extractore.h5')
+    # self.model_feature_extraction_slowfast = tf.keras.models.load_model('Models/MLP_Trial.h5')
     self.video_path = video_path
     #
-    self.MLP_Model = tf.keras.models.load_model('Models/best_model_standarized.h5')
+    self.MLP_Model = tf.keras.models.load_model('Models/MLP_Trial.h5')
     self.video = EncodedVideo.from_path( video_path )
     self.output_dir = output_dir
   def extract_features(self, ):
     num_of_clips= int(self.video.duration) // int(1.0666666666666667)
     print("Video clips: ", num_of_clips)
     print(self.video.duration)
-    all_features = np.zeros((20, 2304))
-    for clip_index, start_sec in enumerate(range(0, 20, int(clip_duration))):
+    all_features = np.zeros((num_of_clips, 2304))
+    for clip_index, start_sec in enumerate(range(0,  int(self.video.duration), int(clip_duration))):
           end_sec = min(start_sec + clip_duration, self.video.duration)
 
           # Load the desired clip (replace with your actual clip loading logic)
@@ -128,14 +130,17 @@ class TemporalDetection:
           features = features.reshape(features.shape[0], -1)
           if (start_sec <2):
                 print(features.shape)
-                all_features[clip_index] = features
+          all_features[clip_index] = features
     return all_features
   def make_predictions(self,):
     scaler = StandardScaler()
     features = self.extract_features()
     print(len(features))
     features = scaler.fit_transform(features)
+    features = pd.DataFrame(features)
+    print("transformed")
     predictions = self.MLP_Model.predict(features)
+    print("predict")
     Binary_predictions = (predictions> 0.5).astype("int32")
     return Binary_predictions
   def concatenated_clips(self, labels):
@@ -158,30 +163,41 @@ class TemporalDetection:
     clips = [[sub_clip[0], sub_clip[-1]] for sub_clip in clips if sub_clip]
     return clips, tics_count, clips_by_one
   def save_video(self, video_tensor, output_path, fps=30):
-      print(video_tensor)
+      # print(video_tensor)
+      # try:
       video_tensor = video_tensor.permute(1, 2, 3, 0)
       io.write_video(output_path, video_tensor, fps)
+      # except Exception as e:
+      #    print(video_tensor)
   def Temporal_Detection(self, ):
 
       preds = self.make_predictions()
       preds = np.array(preds).reshape(-1)
       clips_in_ranges, tics_count, clips = self.concatenated_clips(preds)
     #   print(clips)
-    #   print(preds)
+      print(preds)
+      print(clips_in_ranges)
       output_files=[]
       for i, (start, end) in enumerate(clips_in_ranges):
+          if(start==end):
+             end = start+1
           video_tensor = self.video.get_clip(start, end)
           print("******************start,end", start, end)
-          output_file = os.path.join(self.output_dir, f'clip_{i+1}.mp4')
+          # print(video_tensor)
+          # print(video_tensor['video'])
+          patient_code = self.video_path.split('/')[-1].split('.mp4')[0]
+          output_file = os.path.join(self.output_dir, f'{patient_code}_clip_{i+1}.mp4')
           self.save_video(video_tensor['video'], output_file)
           output_files.append(output_file)
-      return {'clips_in_ranges': clips_in_ranges, "output_path": output_files, 'tics_count': tics_count, 'clips': clips, 'predictions': preds}
+          print("out")
+      # return {'clips_in_ranges': clips_in_ranges, "output_path": output_files, 'ticsDuration': tics_count, 'clips': clips, 'predictions': preds, "sessionLength": float(self.video.duration)}
+      return {'clips_in_ranges': clips_in_ranges, "output_path": output_files, 'ticsDuration': tics_count, "sessionLength": float(self.video.duration)}
 
 #To use this file in another project just import the file in the project and then make an object of the class TemporalDetection 
 #and call the Temporal_Detection method
 
 
 # detect_tics = TemporalDetection(
-#     "downloaded_videos/subject1_video9.mp4", "upload_videos")
+#     "downloaded_videos/subject1_video9.mp4", "uploads")
 # temporals = detect_tics.Temporal_Detection()
 # print(temporals)
