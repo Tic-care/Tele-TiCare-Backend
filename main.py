@@ -7,7 +7,7 @@ import databse_connection as db
 
 
 database = db.database_connection(
-    local_download_path="downloaded_videos", local_upload_path="upload_videos")
+    local_download_path="downloaded_videos", local_upload_path="uploads")
 
 database.initialize()
 
